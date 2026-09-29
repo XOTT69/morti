@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>BADK Simple</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">BADK SIMPLE</div>
+      <h1>Балістична аналітика простими словами</h1>
+      <p class="subtitle">Спрощений перегляд публічних даних BADK Live. Дані оновлюються автоматично приблизно раз на 10 хвилин.</p>
+    </div>
+    <div class="actions">
+      <a class="btn secondary" href="https://mortisgames.github.io/badklive/" target="_blank" rel="noreferrer">Оригінал BADK Live ↗</a>
+      <button id="refreshBtn" class="btn">Оновити зараз</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="notice">
+      <strong>Важливо:</strong> цей сайт лише впорядковує відкриту інформацію. Не використовуйте його як єдине джерело рішень щодо безпеки; орієнтуйтеся на офіційні повітряні тривоги та повідомлення органів влади.
+    </section>
+
+    <section class="status-grid">
+      <article class="panel">
+        <span class="label">Стан даних</span>
+        <div id="dataState" class="big">Завантаження…</div>
+      </article>
+      <article class="panel">
+        <span class="label">Останнє оновлення</span>
+        <div id="updatedAt" class="big small">—</div>
+      </article>
+      <article class="panel">
+        <span class="label">Джерело</span>
+        <div class="big small">BADK Live</div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="section-head">
+        <div>
+          <span class="label">Головне</span>
+          <h2>Короткий огляд</h2>
+        </div>
+        <input id="search" class="search" placeholder="Пошук: місто, дата, тип…" />
+      </div>
+      <div id="summary" class="summary"></div>
+    </section>
+
+    <section class="panel">
+      <span class="label">Табличні дані</span>
+      <h2>Що є в BADK Live</h2>
+      <div id="tables"></div>
+    </section>
+
+    <section class="panel">
+      <span class="label">Пояснення</span>
+      <h2>Розділи оригінального дашборду</h2>
+      <div id="sections" class="cards"></div>
+    </section>
+
+    <details class="panel raw">
+      <summary>Показати сирий текст джерела</summary>
+      <pre id="rawText"></pre>
+    </details>
+  </main>
+
+  <footer>
+    Незалежний інтерфейс до відкритого BADK Live. Не пов'язаний з авторами оригінального проєкту.
+  </footer>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
