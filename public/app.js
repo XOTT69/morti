@@ -1,5 +1,6 @@
 const $ = (s) => document.querySelector(s);
 let snapshot = null;
+let deferredInstallPrompt = null;
 
 function fmtDate(v){
   if(!v) return 'ще немає';
@@ -12,7 +13,7 @@ function render(filter=''){
   if(!snapshot) return;
   const q=filter.trim().toLowerCase();
   $('#updatedAt').textContent=fmtDate(snapshot.fetched_at || snapshot.capturedAt);
-  $('#dataState').textContent=snapshot.fetched_at ? 'Актуальні' : 'Очікується перше оновлення';
+  $('#dataState').textContent=snapshot.fetched_at ? (navigator.onLine ? 'Актуальні' : 'Офлайн-копія') : 'Очікується перше оновлення';
   $('#rawText').textContent=snapshot.bodyText || '';
 
   const sections=(snapshot.sections||[]).filter(x=>!q || `${x.title} ${x.text}`.toLowerCase().includes(q));
@@ -20,7 +21,7 @@ function render(filter=''){
   $('#summary').innerHTML=useful.length ? useful.map(s=>`<article class="summary-card"><strong>${esc(s.title)}</strong><div class="muted">${esc((s.text||'').slice(0,380)) || 'Дані є в оригінальному джерелі.'}</div></article>`).join('') : '<div class="empty">Нічого не знайдено.</div>';
 
   const tables=(snapshot.tables||[]).map(t=>({ ...t, rows:(t.rows||[]).filter(r=>!q || r.join(' ').toLowerCase().includes(q))})).filter(t=>t.rows.length);
-  $('#tables').innerHTML=tables.length ? tables.slice(0,10).map((t,idx)=>{
+  $('#tables').innerHTML=tables.length ? tables.slice(0,10).map((t)=>{
     const rows=t.rows.slice(0,80);
     const cols=Math.max(...rows.map(r=>r.length));
     const normalized=rows.map(r=>Array.from({length:cols},(_,i)=>r[i]||''));
@@ -39,12 +40,44 @@ async function load(){
     snapshot=await r.json();
     render($('#search').value);
   }catch(e){
-    $('#dataState').textContent='Помилка завантаження';
-    $('#summary').innerHTML=`<div class="empty">${esc(e.message)}</div>`;
+    if(snapshot){
+      render($('#search').value);
+      $('#dataState').textContent='Офлайн-копія';
+    } else {
+      $('#dataState').textContent='Помилка завантаження';
+      $('#summary').innerHTML=`<div class="empty">${esc(e.message)}</div>`;
+    }
   }
+}
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  $('#installBtn').hidden = false;
+});
+
+$('#installBtn').addEventListener('click', async () => {
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  $('#installBtn').hidden = true;
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  $('#installBtn').hidden = true;
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(console.error);
+  });
 }
 
 $('#refreshBtn').addEventListener('click',load);
 $('#search').addEventListener('input',e=>render(e.target.value));
+window.addEventListener('online',load);
+window.addEventListener('offline',()=>snapshot && render($('#search').value));
 load();
 setInterval(load,10*60*1000);
