@@ -1,6 +1,12 @@
 name: Update BADK data
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - 'package.json'
+      - '.github/workflows/update-data.yml'
   schedule:
     - cron: '*/10 * * * *'
 permissions:
